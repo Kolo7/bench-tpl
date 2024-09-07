@@ -3,7 +3,6 @@ package db
 import (
 	"fmt"
 	"reflect"
-	"regexp"
 	"strconv"
 
 	"github.com/kolo7/bench-tpl/config"
@@ -38,6 +37,8 @@ func (p *defaultSchemaParser) Parse() (map[string]*Table, error) {
 		if err != nil {
 			return nil, errors.Wrapf(err, "加载表数据失败: %s", tableName)
 		}
+
+		// 装配Column和Row
 		mapColumns := lo.SliceToMap(columns, func(item *Column) (string, *Column) { return item.Field, item })
 		for _, row := range rows {
 			for _, ele := range row {
@@ -50,7 +51,7 @@ func (p *defaultSchemaParser) Parse() (map[string]*Table, error) {
 				}
 			}
 		}
-		tables[tableName] = &Table{Columns: columns, Rows: rows}
+		tables[tableName] = &Table{Name: tableName, Columns: columns, Rows: rows}
 	}
 	return tables, nil
 }
@@ -109,11 +110,10 @@ func (p *defaultSchemaParser) loadColumns(tableName string) ([]*Column, error) {
 
 // 将Ele中的Val值转换成对应的类型
 func (p *defaultSchemaParser) parseVal(ele *Ele) (interface{}, error) {
-	if _, ok := MapTypeToSQL[ele.Column.Type]; !ok {
+	kind, ok := MapTypeToSQL[removeLength(ele.Column.Type)]
+	if !ok {
 		return nil, fmt.Errorf("column field %s,  不支持的类型: %s", ele.Column.Field, ele.Column.Type)
 	}
-	// 获取预设的reflect.Kind
-	kind := MapTypeToSQL[ele.Column.Type]
 	// 将实际类型是[]byte的interface{}转换成对应类型
 	switch kind {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
@@ -127,13 +127,4 @@ func (p *defaultSchemaParser) parseVal(ele *Ele) (interface{}, error) {
 	default:
 		return nil, fmt.Errorf("column field %s,  不支持的类型: %s", ele.Column.Field, ele.Column.Type)
 	}
-}
-
-// 将可变长度的sql类型去除长度
-func (p *defaultSchemaParser) removeLength(t string) string {
-	// 匹配字符串(12) (12,12)
-	reg := `\(\d+(,\d+)?\)`
-	res := regexp.MustCompile(reg)
-	t = res.ReplaceAllString(t, "")
-	return t
 }

@@ -7,8 +7,6 @@ import (
 )
 
 func TestRemoveLength(t *testing.T) {
-	parser := &defaultSchemaParser{}
-
 	testCases := []struct {
 		input    string
 		expected string
@@ -27,7 +25,7 @@ func TestRemoveLength(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.input, func(t *testing.T) {
-			result := parser.removeLength(tc.input)
+			result := removeLength(tc.input)
 			assert.Equal(t, tc.expected, result)
 		})
 	}

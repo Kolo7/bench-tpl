@@ -13,6 +13,7 @@ var configFile = flag.String("f", "etc/config.yaml", "the config file")
 
 func main() {
 	var c config.Config
+	flag.Parse()
 	conf.MustLoad(*configFile, &c)
 
 	dbGenerator := generate.NewDBGenerator(&c)

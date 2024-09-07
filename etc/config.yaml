@@ -1,5 +1,6 @@
 db:
-  dsn: "root:abc123@tcp(127.0.0.1:3306)/uni_comm?charset=utf8mb4&parseTime=True&loc=Local"
+  dsn: "root:E2FU0O1b@tcp(127.0.0.1:3306)/uni_comm?charset=utf8mb4&parseTime=True&loc=Local"
+
 
 Tables:
   sys_config:
