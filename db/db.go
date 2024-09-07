@@ -1,13 +1,21 @@
 package db
 
-import "github.com/zeromicro/go-zero/core/stores/sqlx"
+import (
+	"database/sql"
+
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+)
 
 type DB struct {
-	sqlx.SqlConn
+	*sql.DB
 }
 
 func NewDB(dsn string) *DB {
+	db, err := sqlx.NewMysql(dsn).RawDB()
+	if err != nil {
+		panic(err)
+	}
 	return &DB{
-		SqlConn: sqlx.NewMysql(dsn),
+		DB: db,
 	}
 }
