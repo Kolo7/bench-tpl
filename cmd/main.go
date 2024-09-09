@@ -17,7 +17,7 @@ func main() {
 	conf.MustLoad(*configFile, &c)
 
 	dbGenerator := generate.NewDBGenerator(&c)
-	err := dbGenerator.Generate(context.Background())
+	_, err := dbGenerator.Generate(context.Background())
 	if err != nil {
 		panic(err)
 	}

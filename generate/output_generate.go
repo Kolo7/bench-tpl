@@ -13,10 +13,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-type TplGenerator struct {
+type EpochGenerator struct {
 	name       string
 	cfg        *config.Config
-	tplCfg     *config.TplConf
+	epochCfg   *config.EpochConf
 	varManager *varmanager.VarManager
 
 	defaultEpoch int
@@ -25,24 +25,24 @@ type TplGenerator struct {
 	tpl *template.Template
 }
 
-func NewGenerator(
+func NewEpochGenerator(
 	name string,
 	cfg *config.Config,
-	tplCfg *config.TplConf,
-	varManager *varmanager.VarManager) *TplGenerator {
-	g := &TplGenerator{
+	epochCfg *config.EpochConf,
+	varManager *varmanager.VarManager) Generator {
+	g := &EpochGenerator{
 		name:         name,
 		cfg:          cfg,
-		tplCfg:       tplCfg,
+		epochCfg:     epochCfg,
 		varManager:   varManager,
-		defaultEpoch: tplCfg.Epoch,
-		tplFileName:  fmt.Sprintf("%s/%s.%s", tplCfg.Dir, name, tplCfg.Format),
+		defaultEpoch: epochCfg.Epoch,
+		tplFileName:  fmt.Sprintf("%s/%s.%s", epochCfg.Dir, name, epochCfg.Format),
 	}
 
 	return g
 }
 
-func (g *TplGenerator) Generate(ctx context.Context) (string, error) {
+func (g *EpochGenerator) Generate(ctx context.Context) (string, error) {
 	var (
 		outText strings.Builder
 	)
@@ -59,6 +59,7 @@ func (g *TplGenerator) Generate(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", errors.Wrapf(err, "解析模板文件 %s 失败", g.tplFileName)
 	}
+
 	for i := 0; i < g.defaultEpoch; i++ {
 		data := g.varManager.GetTables()
 		err = tpl.Execute(&outText, data)
@@ -75,7 +76,7 @@ func (g *TplGenerator) Generate(ctx context.Context) (string, error) {
 }
 
 // 加载模板文件
-func (g *TplGenerator) loadTemplate() ([]byte, error) {
+func (g *EpochGenerator) loadTemplate() ([]byte, error) {
 	file, err := os.OpenFile(g.tplFileName, os.O_RDONLY, 0666)
 	if err != nil {
 		return nil, errors.Wrapf(err, "打开模板文件 %s 失败", g.tplFileName)

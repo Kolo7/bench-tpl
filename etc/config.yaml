@@ -38,3 +38,32 @@ TableConf:
     Epoch: 1
   chorus_join_info:
     epoch: 1
+
+nestRoot:
+  name: root
+  nest:
+    - name: api
+      package: api
+      nest:
+        - name: *.go
+    - name: internal
+      package: internal
+      nest:
+        - package: model
+          nest:
+            - name: model_base.go
+            - name: model_*.go
+            - name: model_*_gen.go
+        - package: dao
+          nest:
+            - name: dao_base.go
+            - name: dao_*.go
+            - name: dao_*_gen.go
+        - package: service
+          nest:
+            - name: service_*.go
+        - package: server
+          nest:
+            - package: http
+              nest:
+                - name: *.go

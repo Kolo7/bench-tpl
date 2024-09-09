@@ -7,6 +7,7 @@ import (
 
 	"github.com/kolo7/bench-tpl/config"
 	"github.com/kolo7/bench-tpl/db"
+	"github.com/kolo7/bench-tpl/input"
 	"github.com/kolo7/bench-tpl/varmanager"
 	"github.com/pkg/errors"
 )
@@ -16,9 +17,10 @@ type DBGenerator struct {
 
 	varManager   *varmanager.VarManager
 	schemaParser db.SchemaParser
+	tplFileInput *input.TplFileInput
 }
 
-func NewDBGenerator(cfg *config.Config) *DBGenerator {
+func NewDBGenerator(cfg *config.Config) Generator {
 	g := &DBGenerator{
 		cfg: cfg,
 	}
@@ -26,13 +28,14 @@ func NewDBGenerator(cfg *config.Config) *DBGenerator {
 	conn := db.NewDB(cfg.DB.Dsn)
 	g.schemaParser = db.NewSchemaParser(conn, cfg)
 	g.varManager = varmanager.NewVarManager()
+	g.tplFileInput = input.NewTplFileInput(cfg)
 	return g
 }
 
-func (g *DBGenerator) Generate(ctx context.Context) error {
+func (g *DBGenerator) Generate(ctx context.Context) (string, error) {
 	tables, err := g.schemaParser.Parse()
 	if err != nil {
-		return err
+		return "", err
 	}
 	g.varManager.SetGlobalVar("db", tables)
 
@@ -41,18 +44,18 @@ func (g *DBGenerator) Generate(ctx context.Context) error {
 	}
 
 	for name, tpl := range g.cfg.TplConf {
-		tableGenerate := NewGenerator(name, g.cfg, tpl, g.varManager)
+		tableGenerate := NewEpochGenerator(name, g.cfg, tpl, g.varManager)
 		text, err := tableGenerate.Generate(ctx)
 		if err != nil {
-			return err
+			return "", err
 		}
 		err = g.outputFile(ctx, name, text)
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
 
-	return nil
+	return "", nil
 }
 
 func (g *DBGenerator) outputFile(ctx context.Context, tplName string, text string) error {
