@@ -1,10 +1,10 @@
 package config
 
 type Config struct {
-	Tables map[string]*TableConf `json:","`
-	DB     DBConf                `json:","`
-	Output OutputConf            `json:","`
-	Input  InputConf             `json:","`
+	TableConf map[string]*TableConf `json:","`
+	Output    OutputConf            `json:","`
+	DB        DBConf                `json:","`
+	TplConf   map[string]*TplConf   `json:","`
 }
 
 type DBConf struct {
@@ -20,7 +20,8 @@ type OutputConf struct {
 	Format string `json:",optional,default=json"`
 }
 
-type InputConf struct {
+type TplConf struct {
 	Dir    string `json:",default=."`
 	Format string `json:",default=tpl"`
+	Epoch  int    `json:",optional,default=100"`
 }

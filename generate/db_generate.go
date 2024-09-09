@@ -37,21 +37,26 @@ func (g *DBGenerator) Generate(ctx context.Context) error {
 	g.varManager.SetGlobalVar("db", tables)
 
 	for _, table := range tables {
-		tableGenerate := NewGenerator(g.cfg, g.cfg.Tables[table.Name], g.varManager, table)
+		g.varManager.SetTableVar(table)
+	}
+
+	for name, tpl := range g.cfg.TplConf {
+		tableGenerate := NewGenerator(name, g.cfg, tpl, g.varManager)
 		text, err := tableGenerate.Generate(ctx)
 		if err != nil {
 			return err
 		}
-		err = g.outputFile(ctx, table.Name, text)
+		err = g.outputFile(ctx, name, text)
 		if err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
-func (g *DBGenerator) outputFile(ctx context.Context, tableName string, text string) error {
-	outputFile := fmt.Sprintf("%s/%s.%s", g.cfg.Output.Dir, tableName, g.cfg.Output.Format)
+func (g *DBGenerator) outputFile(ctx context.Context, tplName string, text string) error {
+	outputFile := fmt.Sprintf("%s/%s.%s", g.cfg.Output.Dir, tplName, g.cfg.Output.Format)
 	file, err := os.OpenFile(outputFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		// 创建目录

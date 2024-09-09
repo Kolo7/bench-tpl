@@ -14,6 +14,7 @@ const (
 	TypeDBBool      = "bool"
 	TypeDBTime      = "datetime"
 	TypeDBTimestamp = "timestamp"
+	TypeText        = "text"
 )
 
 // sql类型与go类型反射值
@@ -25,6 +26,8 @@ var MapTypeToSQL = map[string]reflect.Kind{
 	TypeDBTime:      reflect.String,
 	TypeDBBool:      reflect.Bool,
 	TypeDBTimestamp: reflect.String,
+	TypeTinyInt:     reflect.Int,
+	TypeText:        reflect.String,
 }
 
 // 将可变长度的sql类型去除长度

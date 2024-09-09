@@ -28,7 +28,7 @@ func NewSchemaParser(db *DB, cfg *config.Config) SchemaParser {
 
 func (p *defaultSchemaParser) Parse() (map[string]*Table, error) {
 	tables := make(map[string]*Table)
-	for tableName := range p.cfg.Tables {
+	for tableName := range p.cfg.TableConf {
 		columns, err := p.loadColumns(tableName)
 		if err != nil {
 			return nil, errors.Wrapf(err, "解析表结构失败: %s", tableName)
