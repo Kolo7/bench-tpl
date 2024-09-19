@@ -30,6 +30,18 @@ var MapTypeToSQL = map[string]reflect.Kind{
 	TypeText:        reflect.String,
 }
 
+var MapTypeToGo = map[string]string{
+	TypeDBInt:       "int",
+	TypeDBBigInt:    "int64",
+	TypeDBString:    "string",
+	TypeDBFloat:     "float64",
+	TypeDBTime:      "time.Time",
+	TypeDBBool:      "bool",
+	TypeDBTimestamp: "time.Time",
+	TypeTinyInt:     "int",
+	TypeText:        "string",
+}
+
 // 将可变长度的sql类型去除长度
 func removeLength(t string) string {
 	// 匹配字符串(12) (12,12)

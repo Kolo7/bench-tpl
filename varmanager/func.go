@@ -1,6 +1,11 @@
 package varmanager
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+
+	"github.com/samber/lo"
+)
 
 // 定义一个生成随机数的函数
 func RandomInt(min, max int) int {
@@ -39,4 +44,21 @@ func RandomChinese(length int) string {
 		str += string(rune(RandomInt(min, max)))
 	}
 	return str
+}
+
+// tag 生成
+func ToTag(colName string) string {
+	return fmt.Sprintf(`json:"%s" db:"%s" gorm:"column:%s"`, colName, colName, colName)
+}
+
+// 判断数组中是否存在某个值
+func InExcludedFields(val string) bool {
+	return lo.Contains([]string{"Id", "CreatedAt", "CreateTime", "UpdateTime", "UpdatedAt"}, val)
+}
+
+func Sub(a, b int) int {
+	if a < b {
+		return 0
+	}
+	return a - b
 }

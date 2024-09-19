@@ -1,69 +1,37 @@
+fqdn: "github.com/kolo7/bench-tpl/output"
 db:
-  dsn: "yc_mgchorus_rw:TPBDAhHMGchcBEtz@tcp(10.43.30.164:9001)/mgchorus?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
-  # dsn: "root:E2FU0O1b@tcp(127.0.0.1:3306)/uni_comm?charset=utf8mb4&parseTime=True&loc=Local"
-
-TplConf:
-  barrage:
-    dir: "tpl"
-    epoch: 500
-  videos:
-    dir: "tpl"
-    epoch: 500
-  detail:
-    dir: "tpl"
-    epoch: 500
-  rank:
-    dir: "tpl"
-    epoch: 500
-  up:
-    dir: "tpl"
-    epoch: 500
-  share:
-    dir: "tpl"
-    epoch: 500
-  insert:
-    dir: "tpl"
-    epoch: 1000
-  insert-join:
-    dir: "tpl"
-    epoch: 500
-  insert-join-rel:
-    dir: "tpl"
-    epoch: 500
+  # dsn: "yc_mgchorus_rw:TPBDAhHMGchcBEtz@tcp(10.43.30.164:9001)/mgchorus?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+  dsn: "root:E2FU0O1b@tcp(127.0.0.1:3306)/uni_comm?charset=utf8mb4&parseTime=True&loc=Local"
+# epochConf:
+#   barrage:
+#     dir: "tpl"
+#     epoch: 500
+#   videos:
+#     dir: "tpl"
+#     epoch: 500
+#   detail:
+#     dir: "tpl"
+#     epoch: 500
+#   rank:
+#     dir: "tpl"
+#     epoch: 500
+#   up:
+#     dir: "tpl"
+#     epoch: 500
+#   share:
+#     dir: "tpl"
+#     epoch: 500
+#   insert:
+#     dir: "tpl"
+#     epoch: 1000
+#   insert-join:
+#     dir: "tpl"
+#     epoch: 500
+#   insert-join-rel:
+#     dir: "tpl"
+#     epoch: 500
     
 TableConf:
-  chorus_sharding:
-    Epoch: 1
-  user_chorus:
-    Epoch: 1
-  chorus_join_info:
+  sys_config:
     epoch: 1
 
-nestRoot:
-  name: root
-  nest:
-    - name: api
-      package: api
-      nest:
-        - name: *.go
-    - name: internal
-      package: internal
-      nest:
-        - package: model
-          nest:
-            - name: model_base.go
-            - name: model_*.go
-            - name: model_*_gen.go
-        - package: dao
-          nest:
-            - name: dao_base.go
-            - name: dao_*.go
-            - name: dao_*_gen.go
-        - package: service
-          nest:
-            - name: service_*.go
-        - package: server
-          nest:
-            - package: http
-              nest:
-                - name: *.go

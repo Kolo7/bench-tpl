@@ -13,6 +13,7 @@ type Column struct {
 	Key     string `json:"key" db:"key"`
 	Default any    `json:"default" db:"default"`
 	Extra   string `json:"extra" db:"extra"`
+	GoType  string `json:"go_type" db:"go_type"`
 }
 
 type Row []*Ele

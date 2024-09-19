@@ -45,6 +45,7 @@ func (p *defaultSchemaParser) Parse() (map[string]*Table, error) {
 				if col, ok := mapColumns[ele.Name]; ok {
 					ele.Column = col
 					ele.Val, err = p.parseVal(ele)
+					ele.Column.GoType = MapTypeToGo[removeLength(ele.Column.Type)]
 					if err != nil {
 						return nil, errors.Wrapf(err, "解析列数据类型失败: %s", tableName)
 					}

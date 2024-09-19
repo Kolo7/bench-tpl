@@ -5,8 +5,8 @@ type Config struct {
 	Input     InputConf             `json:","`
 	Output    OutputConf            `json:","`
 	DB        DBConf                `json:","`
-	TplConf   map[string]*EpochConf `json:",optional"`
-	NestRoot  *NestConf             `json:",optional"`
+	EpochConf map[string]*EpochConf `json:",optional"`
+	FQDN      string                `json:","`
 }
 
 type DBConf struct {
@@ -18,7 +18,8 @@ type TableConf struct {
 }
 
 type InputConf struct {
-	Dir string `json:",optional,default=./input"`
+	Dir      string `json:",optional,default=./tpl"`
+	NestFile string `json:",optional,default=./tpl/nest.yaml"`
 }
 
 type OutputConf struct {
@@ -32,9 +33,12 @@ type EpochConf struct {
 	Epoch  int    `json:",optional,default=100"`
 }
 
+var DefaultNestConf = NestConf{}
+
 type NestConf struct {
-	Name        string                 `json:",optional"`
-	PackageName string                 `json:",optional,inherit"`
-	Nest        []*NestConf            `json:",optional"`
-	ExtMap      map[string]interface{} `json:",optional"`
+	Name      string                 `json:",optional"`
+	Package   string                 `json:",optional,inherit"`
+	Nest      []*NestConf            `json:",optional"`
+	PkgUnique bool                   `json:",optional,default=false"`
+	ExtMap    map[string]interface{} `json:",optional"`
 }

@@ -61,7 +61,7 @@ func (g *EpochGenerator) Generate(ctx context.Context) (string, error) {
 	}
 
 	for i := 0; i < g.defaultEpoch; i++ {
-		data := g.varManager.GetTables()
+		data := g.varManager.GetTablesExampleVar()
 		err = tpl.Execute(&outText, data)
 		if err != nil {
 			return "", errors.Wrapf(err, "生成 %s 模板失败", g.name)

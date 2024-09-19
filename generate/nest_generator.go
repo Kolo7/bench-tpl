@@ -2,10 +2,9 @@ package generate
 
 import (
 	"context"
-	"fmt"
-	"html/template"
 	"os"
 	"path/filepath"
+	"text/template"
 
 	"github.com/kolo7/bench-tpl/config"
 	"github.com/kolo7/bench-tpl/varmanager"
@@ -21,19 +20,25 @@ type NestGenerator struct {
 
 	tpl       *template.Template
 	outputDir string
+	table     string
 }
 
-func NewNestGenerator(cfg *config.Config, varManager *varmanager.VarManager, tpl *template.Template) Generator {
+func NewNestGenerator(cfg *config.Config, table string, varManager *varmanager.VarManager, tpl *template.Template) Generator {
 	return &NestGenerator{
 		cfg:        cfg,
-		outputDir:  fmt.Sprintf("%s", cfg.Output.Dir),
+		outputDir:  cfg.Output.Dir,
 		varManager: varManager,
 		tpl:        tpl,
+		table:      table,
 	}
 }
 
 func (g *NestGenerator) Generate(ctx context.Context) (string, error) {
-	return "nest", nil
+	if err := g.createNest(ctx, &config.DefaultNestConf); err != nil {
+		return "", err
+	}
+
+	return "", nil
 }
 
 // 按cfg.NestRoot的嵌套结构创建目录层级
@@ -71,7 +76,7 @@ func (g *NestGenerator) Generate(ctx context.Context) (string, error) {
 //	            package: http
 //	            nest:
 //	              - name: *.go
-func (g *NestGenerator) createNest(ctx context.Context, nest *config.NestConf) error {
+func (g *NestGenerator) createNest(ctx context.Context, nest *config.NestConf, prefix ...string) error {
 	if nest == nil {
 		return nil
 	}
@@ -82,18 +87,13 @@ func (g *NestGenerator) createNest(ctx context.Context, nest *config.NestConf) e
 	}
 
 	if isPackage {
-		packageName := nest.PackageName
+		packageName := nest.Package
 		if packageName == "" {
 			packageName = nest.Name
 		}
-
-		// 创建package目录
-		if err := os.MkdirAll(filepath.Join(g.outputDir), 0755); err != nil {
-			return err
-		}
 		// 递归创建nest
 		for _, n := range nest.Nest {
-			if err := g.createNest(ctx, n); err != nil {
+			if err := g.createNest(ctx, n, append(prefix, packageName)...); err != nil {
 				return err
 			}
 		}
@@ -101,9 +101,48 @@ func (g *NestGenerator) createNest(ctx context.Context, nest *config.NestConf) e
 	}
 
 	if len(nest.Name) > 0 {
+		// 设置包级别变量
+		g.varManager.SetPackageVar(prefix...)
 		// 调用方法,使用模板创建文件
 		// 加载模板
-		// err = g.tpl.Lookup(nest.Name)
+		tpl := g.tpl.Lookup(nest.Name + ".tpl")
+		if tpl == nil {
+			return nil
+		}
+		// 创建文件，如果文件已经存在，则不创建
+		var (
+			f          *os.File
+			goFileName string
+		)
+		outDir := filepath.Join(g.outputDir, filepath.Join(prefix...))
+		if nest.PkgUnique {
+			goFileName = filepath.Join(outDir, nest.Name+".go")
+		} else {
+			goFileName = filepath.Join(outDir, g.table+"_"+nest.Name+".go")
+		}
+		if _, err := os.Stat(outDir); os.IsNotExist(err) {
+			// 创建多级目录
+			if err := os.MkdirAll(outDir, 0755); err != nil {
+				return err
+			}
+			// 创建文件
+			f, err = os.OpenFile(goFileName, os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				return err
+			}
+		} else if err != nil {
+			return err
+		} else {
+			// 覆盖写
+			f, err = os.OpenFile(goFileName, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+			if err != nil {
+				return err
+			}
+		}
+		defer f.Close()
+		if err := tpl.Execute(f, g.varManager.GetTableVar(g.table)); err != nil {
+			return err
+		}
 	}
 	return nil
 }

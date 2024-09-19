@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"text/template"
 
 	"github.com/kolo7/bench-tpl/config"
 	"github.com/kolo7/bench-tpl/db"
@@ -37,14 +38,20 @@ func (g *DBGenerator) Generate(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	g.varManager.SetGlobalVar("db", tables)
+	// g.varManager.SetGlobalVar("db", tables)
 
 	for _, table := range tables {
-		g.varManager.SetTableVar(table)
+		g.varManager.SetTableExampleVar(table)
 	}
 
-	for name, tpl := range g.cfg.TplConf {
-		tableGenerate := NewEpochGenerator(name, g.cfg, tpl, g.varManager)
+	tpl := template.New("").Funcs(g.varManager.GetFuncMap())
+	tpl, err = g.tplFileInput.LoadTemplate(tpl, "")
+	if err != nil {
+		return "", err
+	}
+
+	for name, epoch := range g.cfg.EpochConf {
+		tableGenerate := NewEpochGenerator(name, g.cfg, epoch, g.varManager)
 		text, err := tableGenerate.Generate(ctx)
 		if err != nil {
 			return "", err
@@ -54,7 +61,14 @@ func (g *DBGenerator) Generate(ctx context.Context) (string, error) {
 			return "", err
 		}
 	}
-
+	// 设置全局变量
+	g.varManager.SetGlobalVar(g.cfg.FQDN)
+	for name := range tables {
+		nest := NewNestGenerator(g.cfg, name, g.varManager, tpl)
+		if _, err := nest.Generate(ctx); err != nil {
+			return "", err
+		}
+	}
 	return "", nil
 }
 
