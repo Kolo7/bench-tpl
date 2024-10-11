@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -15,6 +16,9 @@ import (
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
 )
+
+//go:embed etc/config.yaml tpl/*
+var Content embed.FS
 
 var configFile = flag.String("f", "", "the config file")
 var nestFile = flag.String("n", "", "the nest config file")

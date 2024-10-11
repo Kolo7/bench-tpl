@@ -4,6 +4,7 @@ package {{.lowerPkgName}}
 
 import (
     "context"
+    "errors"
     "fmt"
     "strings"
 

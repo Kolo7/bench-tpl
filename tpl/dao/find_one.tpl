@@ -5,7 +5,7 @@ func (d *Dao) {{ .upperTableName}}FindOne(ctx context.Context, {{ .lowerTableNam
     row := d.DB(ctx)
     var {{ .lowerTableName}} model.{{ .upperTableName}}
     if err := row.Raw(query, {{ .lowerTableName}}Id).Scan(&{{ .lowerTableName}}).Error; err!= nil {
-        return nil, err
+        return nil, errors.Join(err, ErrNotFound)
     }
     return &{{ .lowerTableName}}, nil
 }

@@ -13,6 +13,10 @@ const (
 	dbTag          = "json"
 )
 
+var (
+	ErrNotFound = gorm.ErrRecordNotFound
+)
+
 type count struct {
 	Count int64 `json:"count"`
 }
