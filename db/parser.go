@@ -5,7 +5,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/kolo7/bench-tpl/config"
+	"github.com/Kolo7/bench-tpl/config"
+	"github.com/Kolo7/bench-tpl/utils"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 )
@@ -28,10 +29,15 @@ func NewSchemaParser(db *DB, cfg *config.Config) SchemaParser {
 
 func (p *defaultSchemaParser) Parse() (map[string]*Table, error) {
 	tables := make(map[string]*Table)
-	for tableName := range p.cfg.Tables {
+	for tableName := range p.cfg.TableConf {
 		columns, err := p.loadColumns(tableName)
 		if err != nil {
 			return nil, errors.Wrapf(err, "解析表结构失败: %s", tableName)
+		}
+		for _, column := range columns {
+			column.GoType = MapTypeToGo[removeLength(column.Type)]
+			column.Lower = utils.ToLowerCamelCase(column.Field)
+			column.Upper = utils.ToUpperCamelCase(column.Field)
 		}
 		rows, err := p.loadRows(tableName)
 		if err != nil {

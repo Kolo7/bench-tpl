@@ -19,6 +19,7 @@ func TestRemoveLength(t *testing.T) {
 		{"varchar", "varchar"},
 		{"int", "int"},
 		{"decimal", "decimal"},
+		{"tinyint(3)", "tinyint"},
 		{"varchar(255)int(11)", "varcharint"},
 		{"varchar(255)int(11)decimal(10,2)", "varcharintdecimal"},
 	}

@@ -1,69 +1,154 @@
 package varmanager
 
 import (
-	"reflect"
-	"strconv"
+	"html/template"
 	"strings"
 
-	"github.com/kolo7/bench-tpl/db"
+	"github.com/Kolo7/bench-tpl/db"
+	"github.com/Kolo7/bench-tpl/utils"
+	"github.com/samber/lo"
 )
 
 type VarManager struct {
-	vars map[string]interface{}
+	globalVars       map[string]interface{}
+	packageVars      map[string]interface{}
+	tableExampleVars map[string]map[string]interface{}
+	tables           map[string]*db.Table
+	funcs            template.FuncMap
 }
 
 func NewVarManager() *VarManager {
 	return &VarManager{
-		vars: make(map[string]interface{}),
+		globalVars:       make(map[string]interface{}),
+		tables:           make(map[string]*db.Table),
+		tableExampleVars: make(map[string]map[string]interface{}),
+		packageVars:      make(map[string]interface{}),
+		funcs: map[string]interface{}{
+			"rand":             RandomInt,
+			"randomLetters":    RandomLetters,
+			"randomNumbers":    RandomNumbers,
+			"randomChinese":    RandomChinese,
+			"toTag":            ToTag,
+			"toUpperCamelCase": utils.ToUpperCamelCase,
+			"toLowerCamelCase": utils.ToLowerCamelCase,
+			"toSnakeCase":      utils.ToSnakeCase,
+			"inExcludedFields": InExcludedFields,
+			"sub":              Sub,
+		},
 	}
 }
 
-func (vm *VarManager) SetGlobalVar(name string, value interface{}) {
-	if value == nil {
+func (vm *VarManager) SetTableExampleVar(table *db.Table) {
+	if table == nil {
 		return
 	}
-	vm.vars[name] = value
-}
+	vm.tables[table.Name] = table
 
-func (vm *VarManager) SetTableVar(Table *db.Table) {
-	vm.vars["table_name"] = Table.Name
-}
-
-// 展平变量
-func (vm *VarManager) SetFlattenVar(name string, value interface{}) {
-	if value == nil {
+	rows := lo.Shuffle[db.Row](table.Rows)
+	if len(rows) == 0 {
 		return
 	}
-	// 反射判断value是不是结构体
-	typ := reflect.TypeOf(value)
-	val := reflect.ValueOf(value)
-	if typ.Kind() == reflect.Struct {
-		// 如果是结构体，则将结构体的字段名和字段值都存入变量管理器
-		for i := 0; i < typ.NumField(); i++ {
-			subName := name + "_" + strings.ToLower(typ.Field(i).Name)
-			vm.SetGlobalVar(subName, val.Field(i).Interface())
-		}
-	} else if typ.Kind() == reflect.Ptr {
-		// 如果是指针，则递归调用SetVar函数
-		vm.SetGlobalVar(name, val.Elem().Interface())
-	} else if typ.Kind() == reflect.Slice {
-		// 如果是切片，则将切片的元素都存入变量管理器
-		for i := 0; i < val.Len(); i++ {
-			subName := name + "_" + strconv.Itoa(i)
-			vm.SetGlobalVar(subName, val.Index(i).Interface())
-		}
-	} else if typ.Kind() == reflect.Map {
-		// 如果是map，则将map的键值对都存入变量管理器
-		for _, key := range val.MapKeys() {
-			subName := name + "_" + key.String()
-			vm.SetGlobalVar(subName, val.MapIndex(key).Interface())
-		}
+	rowMap := make(map[string]interface{})
+	for _, ele := range rows[0] {
+		rowMap[ele.Column.Field] = ele.Val
 	}
-
-	// 其他类型直接存入变量管理器
-	vm.vars[name] = value
+	vm.tableExampleVars[table.Name] = rowMap
 }
 
-func (vm *VarManager) Get() map[string]interface{} {
-	return vm.vars
+func (vm *VarManager) GetTablesExampleVar() map[string]map[string]interface{} {
+	return vm.tableExampleVars
+}
+
+func (vm *VarManager) GetFuncMap() template.FuncMap {
+	return vm.funcs
+}
+
+func (vm *VarManager) SetGlobalVar(fqdn string) {
+	if fqdn != "" {
+		vm.globalVars["fqdn"] = fqdn
+	}
+}
+
+func (vm *VarManager) GetGlobalVar() map[string]interface{} {
+	return vm.globalVars
+}
+
+// 设置包级别的变量
+// 入参：包路径，包名
+func (vm *VarManager) SetPackageVar(pkgPath ...string) {
+	if len(pkgPath) == 0 {
+		return
+	}
+	// 从全局变量获取fqdn
+	fqdn := vm.globalVars["fqdn"].(string)
+	vm.packageVars = make(map[string]interface{})
+	// 把全局变量也放入包级别变量中
+	loadMap2Map(vm.packageVars, vm.globalVars)
+	// 包全名
+	pkgFullName := strings.Join([]string{fqdn, strings.Join(pkgPath, "/")}, "/")
+	upperPkgName := utils.ToUpperCamelCase(pkgPath[len(pkgPath)-1])
+	lowerPkgName := utils.ToLowerCamelCase(pkgPath[len(pkgPath)-1])
+	vm.packageVars["pkgFullName"] = pkgFullName
+	vm.packageVars["upperPkgName"] = upperPkgName
+	vm.packageVars["lowerPkgName"] = lowerPkgName
+
+	// 特殊包名设置为全局变量
+	// model
+	if strings.HasSuffix(pkgFullName, "/model") {
+		vm.globalVars["modelPackageName"] = pkgFullName
+	}
+	// dao
+	if strings.HasSuffix(pkgFullName, "/dao") {
+		vm.globalVars["daoPackageName"] = pkgFullName
+	}
+	// api
+	if strings.HasSuffix(pkgFullName, "/api") {
+		vm.globalVars["apiPackageName"] = pkgFullName
+	}
+}
+
+// 获取包级别的变量
+func (vm *VarManager) GetPackageVar() map[string]interface{} {
+	return vm.packageVars
+}
+
+// 获取表级别的变量
+func (vm *VarManager) GetTableVar(tableName string) map[string]interface{} {
+	table := vm.tables[tableName]
+	if table == nil {
+		return nil
+	}
+	// 表级别的变量
+	varMap := make(map[string]interface{})
+	// 拷贝全局变量
+	loadMap2Map(varMap, vm.globalVars)
+	// 拷贝包级别变量
+	loadMap2Map(varMap, vm.packageVars)
+	// 将常用的表相关变量放入变量管理器
+	varMap["tableName"] = table.Name
+	// 大写开头的表名
+	varMap["upperTableName"] = utils.ToUpperCamelCase(table.Name)
+	// 小写开头的表名
+	varMap["lowerTableName"] = utils.ToLowerCamelCase(table.Name)
+	// 字段名列表
+	varMap["tableColumnFields"] = lo.Map(table.Columns, func(col *db.Column, _ int) interface{} { return col.Field })
+	// 大驼峰字段名列表
+	varMap["tableColumnUpperFields"] = lo.Map(table.Columns, func(col *db.Column, _ int) interface{} { return utils.ToUpperCamelCase(col.Field) })
+	// 主键字段
+	varMap["tablePrimaryKey"] = lo.Reduce(table.Columns, func(agg *db.Column, col *db.Column, _ int) *db.Column {
+		if col.Key == "PRI" {
+			// 主键字段名
+			varMap["tableUpperPrimaryKeyField"] = utils.ToUpperCamelCase(col.Field)
+			return col
+		}
+		return agg
+	}, nil)
+	varMap["tableColumns"] = table.Columns
+	return varMap
+}
+
+func loadMap2Map(m1, m2 map[string]interface{}) {
+	for k, v := range m2 {
+		m1[k] = v
+	}
 }
