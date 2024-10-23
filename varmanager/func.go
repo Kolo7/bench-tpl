@@ -53,7 +53,7 @@ func ToTag(colName string) string {
 
 // 判断数组中是否存在某个值
 func InExcludedFields(val string) bool {
-	return lo.Contains([]string{"Id", "CreatedAt", "CreateTime", "UpdateTime", "UpdatedAt"}, val)
+	return lo.Contains([]string{"Id", "CreatedAt", "CreateTime", "UpdateTime", "UpdatedAt", "Deleted"}, val)
 }
 
 func Sub(a, b int) int {
