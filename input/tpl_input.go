@@ -2,6 +2,7 @@ package input
 
 import (
 	"fmt"
+	"io/fs"
 	"text/template"
 
 	"github.com/Kolo7/bench-tpl/config"
@@ -12,13 +13,15 @@ type TplFileInput struct {
 
 	inputDir string
 	tpl      *template.Template
+	fs       fs.FS
 }
 
 func NewTplFileInput(cfg *config.Config) *TplFileInput {
 
 	return &TplFileInput{
 		cfg:      cfg,
-		inputDir: cfg.Input.Dir,
+		inputDir: cfg.InputDir,
+		fs:       cfg.FS,
 	}
 }
 
@@ -32,7 +35,8 @@ func (t *TplFileInput) LoadTemplate(tpl *template.Template, tplName string) (*te
 		if tpl == nil {
 			tpl = template.New("")
 		}
-		t.tpl, err = tpl.ParseGlob(dir)
+
+		t.tpl, err = tpl.ParseFS(t.fs, dir)
 		if err != nil {
 			return nil, err
 		}

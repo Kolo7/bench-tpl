@@ -2,9 +2,8 @@
 // error gorm.ErrRecordNotFound 代表未找到记录
 func (d *Dao) {{ .upperTableName}}FindOne(ctx context.Context, {{ .lowerTableName}}Id {{.tablePrimaryKey.GoType}}) (*model.{{ .upperTableName}}, error) {
     query := "SELECT * FROM {{ .tableName}} WHERE {{ .tablePrimaryKey.Field}} = ?"
-    row := d.DB(ctx)
     var {{ .lowerTableName}} model.{{ .upperTableName}}
-    if err := row.Raw(query, {{ .lowerTableName}}Id).Scan(&{{ .lowerTableName}}).Error; err!= nil {
+    if err := ormDB.Raw(query, {{ .lowerTableName}}Id).Scan(&{{ .lowerTableName}}).Error; err!= nil {
         return nil, errors.Join(err, ErrNotFound)
     }
     return &{{ .lowerTableName}}, nil

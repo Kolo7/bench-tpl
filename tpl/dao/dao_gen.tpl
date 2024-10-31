@@ -8,6 +8,7 @@ import (
     "fmt"
     "strings"
 
+    "github.com/go-sql-driver/mysql"
     "{{.modelPackageName}}"
 )
 

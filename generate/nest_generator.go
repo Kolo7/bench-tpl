@@ -27,7 +27,7 @@ type NestGenerator struct {
 func NewNestGenerator(cfg *config.Config, table string, varManager *varmanager.VarManager, tpl *template.Template) Generator {
 	return &NestGenerator{
 		cfg:        cfg,
-		outputDir:  cfg.Output.Dir,
+		outputDir:  cfg.OutputDir,
 		varManager: varManager,
 		tpl:        tpl,
 		table:      table,

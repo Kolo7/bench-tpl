@@ -1,30 +1,16 @@
 package config
 
+import "io/fs"
+
 type Config struct {
-	TableConf map[string]*TableConf `json:","`
-	Input     InputConf             `json:","`
-	Output    OutputConf            `json:","`
-	DB        DBConf                `json:","`
+	Tables    []string
+	InputDir  string                `json:","`
+	OutputDir string                `json:","`
+	Dsn       string                `json:",optional",env:"DB_DSN"`
 	EpochConf map[string]*EpochConf `json:",optional"`
 	FQDN      string                `json:","`
-}
 
-type DBConf struct {
-	Dsn string `json:",optional",env:"DB_DSN"`
-}
-
-type TableConf struct {
-	Epoch int `json:",optional,default=100"`
-}
-
-type InputConf struct {
-	Dir      string `json:",optional,default=./tpl"`
-	NestFile string `json:",optional,default=./tpl/nest.yaml"`
-}
-
-type OutputConf struct {
-	Dir    string `json:",optional,default=./output"`
-	Format string `json:",optional,default=json"`
+	FS fs.FS
 }
 
 type EpochConf struct {

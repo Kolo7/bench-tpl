@@ -28,8 +28,19 @@ func NewSchemaParser(db *DB, cfg *config.Config) SchemaParser {
 }
 
 func (p *defaultSchemaParser) Parse() (map[string]*Table, error) {
+	allTables, err := p.loadTables()
+	if err != nil {
+		return nil, errors.Wrap(err, "加载表失败")
+	}
 	tables := make(map[string]*Table)
-	for tableName := range p.cfg.TableConf {
+	validTableMap := lo.SliceToMap(p.cfg.Tables, func(item string) (string, any) { return item, nil })
+	if len(validTableMap) == 0 {
+		validTableMap = lo.SliceToMap(allTables, func(item string) (string, any) { return item, nil })
+	}
+	for _, tableName := range allTables {
+		if _, ok := validTableMap[tableName]; !ok {
+			continue
+		}
 		columns, err := p.loadColumns(tableName)
 		if err != nil {
 			return nil, errors.Wrapf(err, "解析表结构失败: %s", tableName)
@@ -60,6 +71,24 @@ func (p *defaultSchemaParser) Parse() (map[string]*Table, error) {
 		tables[tableName] = &Table{Name: tableName, Columns: columns, Rows: rows}
 	}
 	return tables, nil
+}
+
+func (p *defaultSchemaParser) loadTables() ([]string, error) {
+	rows, err := p.db.Query("SHOW TABLES")
+	if err != nil {
+		return nil, errors.Wrap(err, "查询表失败")
+	}
+	defer rows.Close()
+	v := make([]string, 0)
+	for rows.Next() {
+		var tableName string
+		err = rows.Scan(&tableName)
+		if err != nil {
+			return nil, errors.Wrap(err, "扫描表名失败")
+		}
+		v = append(v, tableName)
+	}
+	return v, nil
 }
 
 func (p *defaultSchemaParser) loadRows(tableName string) ([]Row, error) {

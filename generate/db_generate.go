@@ -27,7 +27,7 @@ func NewDBGenerator(cfg *config.Config) Generator {
 		cfg: cfg,
 	}
 
-	conn := db.NewDB(cfg.DB.Dsn)
+	conn := db.NewDB(cfg.Dsn)
 	g.schemaParser = db.NewSchemaParser(conn, cfg)
 	g.varManager = varmanager.NewVarManager()
 	g.tplFileInput = input.NewTplFileInput(cfg)
@@ -35,6 +35,18 @@ func NewDBGenerator(cfg *config.Config) Generator {
 }
 
 func (g *DBGenerator) Generate(ctx context.Context) (string, error) {
+
+	for name, epoch := range g.cfg.EpochConf {
+		tableGenerate := NewEpochGenerator(name, g.cfg, epoch, g.varManager)
+		text, err := tableGenerate.Generate(ctx)
+		if err != nil {
+			return "", err
+		}
+		err = g.outputFile(ctx, name, text)
+		if err != nil {
+			return "", err
+		}
+	}
 	tables, err := g.schemaParser.Parse()
 	if err != nil {
 		return "", err
@@ -51,17 +63,6 @@ func (g *DBGenerator) Generate(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	for name, epoch := range g.cfg.EpochConf {
-		tableGenerate := NewEpochGenerator(name, g.cfg, epoch, g.varManager)
-		text, err := tableGenerate.Generate(ctx)
-		if err != nil {
-			return "", err
-		}
-		err = g.outputFile(ctx, name, text)
-		if err != nil {
-			return "", err
-		}
-	}
 	// 设置全局变量
 	g.varManager.SetGlobalVar(g.cfg.FQDN)
 	for name := range tables {
@@ -70,16 +71,16 @@ func (g *DBGenerator) Generate(ctx context.Context) (string, error) {
 			return "", err
 		}
 	}
-	GoFmt(g.cfg.Output.Dir)
+	GoFmt(g.cfg.OutputDir)
 	return "", nil
 }
 
 func (g *DBGenerator) outputFile(ctx context.Context, tplName string, text string) error {
-	outputFile := fmt.Sprintf("%s/%s.%s", g.cfg.Output.Dir, tplName, g.cfg.Output.Format)
+	outputFile := fmt.Sprintf("%s/%s.%s", g.cfg.OutputDir, tplName, "json")
 	file, err := os.OpenFile(outputFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		// 创建目录
-		dir := g.cfg.Output.Dir
+		dir := g.cfg.OutputDir
 		if _, err := os.Stat(dir); os.IsNotExist(err) {
 			err = os.MkdirAll(dir, 0755)
 			if err != nil {
