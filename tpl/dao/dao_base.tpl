@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
     "github.com/jinzhu/gorm"
+	"git.imgo.tv/ft/go-ceres/pkg/db/mysql"
 )
 
 const (
@@ -16,7 +17,7 @@ var (
 	ErrNotFound = gorm.ErrRecordNotFound
 	ErrUniqueConflict = fmt.Errorf("unique conflict")
 	
-	ormDB *gorm.DB
+	ormDB *mysql.OrmDb
 )
 
 type count struct {

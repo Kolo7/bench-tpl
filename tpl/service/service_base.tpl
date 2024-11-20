@@ -5,7 +5,7 @@ import (
 )
 
 type Service struct {
-    d *dao.Dao
+    dao *dao.Dao
 }
 
 func Get() *Service {

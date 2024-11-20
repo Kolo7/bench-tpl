@@ -18,16 +18,14 @@
         - name: dao
     - package: service
       nest:
-        - name: service_base
+        - name: service
           pkgUnique: true
         - name: service_gen
-          override: true
     - package: server
       nest:
         - package: http
           nest:
             - name: http_gen
-              override: true
             - name: error
               pkgUnique: true
 - package: pkg
