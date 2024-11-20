@@ -1,5 +1,5 @@
 func (s *Service) {{.upperTableName}}Update(ctx context.Context, req api.{{.upperTableName}}UpdateReq)  ecode.Codes {
-    updated, err := s.d.{{.upperTableName}}FindOne(ctx, req.{{.tableUpperPrimaryKeyField}})
+    updated, err := s.dao.{{.upperTableName}}FindOne(ctx, req.{{.tableUpperPrimaryKeyField}})
     if errors.Is(err, dao.ErrNotFound) {
         return ecode.RequestErr
     }else if err!= nil {
@@ -13,7 +13,7 @@ func (s *Service) {{.upperTableName}}Update(ctx context.Context, req api.{{.uppe
             }
     {{end}}
 {{end}}
-    err = s.d.{{ .upperTableName}}Update(ctx, updated)
+    err = s.dao.{{ .upperTableName}}Update(ctx, updated)
     if errors.Is(err, dao.ErrUniqueConflict) {
         return ecode.Transient(ecode.RequestErr, "已存在")
     }else if err != nil {

@@ -1,5 +1,5 @@
 func (s *Service) {{.upperTableName}}GetAll(ctx context.Context, req api.{{.upperTableName}}GetAllReq) (*api.{{.upperTableName}}GetAllResp, ecode.Codes) {
-    records, total, err := s.d.GetAll{{.upperTableName}}(ctx, req.PageNum, req.PageSize, req.Order)
+    records, total, err := s.dao.GetAll{{.upperTableName}}(ctx, req.PageNum, req.PageSize, req.Order)
     if err!= nil {
         xlog.Error("{{.upperTableName}}GetAll failed: %v", err)
         return nil, ecode.ServerErr
@@ -11,7 +11,7 @@ func (s *Service) {{.upperTableName}}GetAll(ctx context.Context, req api.{{.uppe
     }
     for _, record := range records {
         resp.List = append(resp.List, &api.{{.upperTableName}}Resp{
-            {{range  $field := .tableColumns}}{{$field.Upper}}: record.{{$field.Upper}},
+            {{range  $field := .tableColumns}}{{ if not (eq "Deleted" $field.Upper) -}}{{$field.Upper}}: record.{{$field.Upper}},{{end}}
             {{end}}
         })
     }

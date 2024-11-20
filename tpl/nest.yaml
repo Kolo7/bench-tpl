@@ -1,7 +1,6 @@
 - package: api
   nest:
     - name: api_gen
-      override: true
 
 - package: internal
   nest:

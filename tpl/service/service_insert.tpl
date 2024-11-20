@@ -1,5 +1,5 @@
 func (s *Service) {{.upperTableName}}Insert(ctx context.Context, req api.{{.upperTableName}}InsertReq)  ecode.Codes {
-    err := s.d.{{ .upperTableName}}Insert(ctx, &model.{{.upperTableName}}{
+    err := s.dao.{{ .upperTableName}}Insert(ctx, &model.{{.upperTableName}}{
     {{- range $column := .tableColumns}}{{if not (inExcludedFields $column.Upper)}}{{$column.Upper}}: req.{{$column.Upper}}, {{end}}
     {{end}}
     })
