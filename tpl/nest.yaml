@@ -22,3 +22,18 @@
           pkgUnique: true
         - name: service_gen
           override: true
+    - package: server
+      nest:
+        - package: http
+          nest:
+            - name: http_gen
+              override: true
+            - name: error
+              pkgUnique: true
+- package: pkg
+  nest:
+    - package: validator
+      nest:
+        - name: validator
+          pkgUnique: true
+          

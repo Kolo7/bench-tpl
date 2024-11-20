@@ -5,6 +5,6 @@ type {{.upperTableName}}GetAllReq struct {
 }
 
 type {{.upperTableName}}GetAllResp struct {
-    Total int `json:"total"`
+    Total int64 `json:"total"`
     List []*{{.upperTableName}}Resp `json:"list"`
 }

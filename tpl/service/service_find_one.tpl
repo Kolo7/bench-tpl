@@ -1,13 +1,14 @@
-func (s *Service) {{.upperTableName}}Get(ctx context.Context, req api.{{.upperTableName}}Req) (*api.{{.upperTableName}}Resp, error) {
+func (s *Service) {{.upperTableName}}Get(ctx context.Context, req api.{{.upperTableName}}Req) (*api.{{.upperTableName}}Resp, ecode.Codes) {
     record,err := s.d.{{ .upperTableName}}FindOne(ctx, req.{{.tableUpperPrimaryKeyField}})
     if errors.Is(err, gorm.ErrRecordNotFound) {
-        return nil, gorm.ErrRecordNotFound
+        return nil, ecode.RequestErr
     }else if err!= nil {
-        return nil, err
+        xlog.Error("{{.upperTableName}}FindOne failed, req.{{.tableUpperPrimaryKeyField}}: %v, err: %v", req.{{.tableUpperPrimaryKeyField}}, err)
+        return nil, ecode.ServerErr
     }
     resp := api.{{.upperTableName}}Resp{
         {{range  $field := .tableColumns}}{{$field.Upper}}: record.{{$field.Upper}},
         {{end}}
     }
-    return &resp, nil
+    return &resp, ecode.OK
 }
