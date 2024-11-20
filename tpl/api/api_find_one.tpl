@@ -3,6 +3,7 @@ type {{.upperTableName}}Req struct {
 }
 
 type {{.upperTableName}}Resp struct {
-    {{range $column := .tableColumns}}{{$column.Upper}} {{$column.GoType}} `json:"{{$column.Lower}}"`
-    {{end}}
+    {{range $column := .tableColumns}}
+    {{ if not (eq "Deleted" $column.Upper) -}}
+    {{$column.Upper}} {{$column.GoType}} `json:"{{$column.Lower}}"`{{end}}{{end}}
 }
