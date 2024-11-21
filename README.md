@@ -9,6 +9,7 @@ Usage:
 
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
+  download    下载模板到本地
   help        Help about any command
   model       生成model 代码
 
@@ -34,4 +35,17 @@ Flags:
   -n, --nest-file string    指定嵌套模板文件 (default "tpl/nest.yaml")
   -o, --output-dir string   指定输出目录 (default "./output")
   -t, --tables strings      指定生成的表名
+```
+
+### download
+
+```
+下载模板到本地
+
+Usage:
+  bench-tpl download [flags]
+
+Flags:
+  -h, --help            help for download
+  -o, --output string   输出目录 (default "./tpl")
 ```
