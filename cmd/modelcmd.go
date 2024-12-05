@@ -46,6 +46,9 @@ var modelCmd = &cobra.Command{
 		c.InputDir = input.dir
 		c.OutputDir = output.dir
 		c.FS = globalF
+		if input.dir != "tpl" {
+			c.FS = os.DirFS("./")
+		}
 		data, err := loadNestConfig(input.nestFile)
 		if err != nil {
 			logx.Errorf("read nest config file failed: %v", err)
