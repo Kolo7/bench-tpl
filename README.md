@@ -11,6 +11,7 @@ Available Commands:
   completion  Generate the autocompletion script for the specified shell
   download    下载模板到本地
   help        Help about any command
+  http        发起网络请求
   model       生成model 代码
 
 Flags:
@@ -48,4 +49,19 @@ Usage:
 Flags:
   -h, --help            help for download
   -o, --output string   输出目录 (default "./tpl")
+```
+
+### http
+
+```
+读入批量脚本执行，支持调整并发和限速，可用于发起网络请求。
+
+Usage:
+  bench-tpl http [flags]
+
+Flags:
+  -c, --concurrency int   并发数量 (default 1)
+  -h, --help              help for http
+  -i, --input string      输入文件
+  -t, --interval int      单协程内请求间隔 (default 1000)
 ```
