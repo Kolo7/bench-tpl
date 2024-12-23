@@ -8,6 +8,7 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	github.com/zeromicro/go-zero v1.7.2
+	golang.org/x/sync v0.10.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
