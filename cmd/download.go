@@ -31,8 +31,8 @@ var downloadCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		tplFile := nestDirFileName[0]
-		// 如果tplFile包含多级目录，则创建目录
-		outputFullFilename := filepath.Join(outputDir, tplFile)
+		// 如果tplFile包含多级目录，则创建目录,删除前缀"tpl/"
+		outputFullFilename := filepath.Join(outputDir, tplFile[4:])
 		err = createDir(filepath.Dir(outputFullFilename))
 		if err != nil {
 			logx.Errorf("create dir failed: %v", err)
@@ -56,7 +56,7 @@ var downloadCmd = &cobra.Command{
 		}
 		for _, tplFile := range list {
 			// 如果tplFile包含多级目录，则创建目录
-			outputFullFilename := filepath.Join(outputDir, tplFile)
+			outputFullFilename := filepath.Join(outputDir, tplFile[4:])
 			err := createDir(filepath.Dir(outputFullFilename))
 			if err != nil {
 				logx.Errorf("create dir failed: %v", err)
@@ -81,7 +81,7 @@ var downloadCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(downloadCmd)
-	downloadCmd.Flags().StringVarP(&outputDir, "output", "o", "./tpl", "输出目录")
+	downloadCmd.Flags().StringVarP(&outputDir, "output", "o", "./templates", "输出目录")
 }
 
 // 将字节数组写到本地文件

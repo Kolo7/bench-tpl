@@ -27,7 +27,7 @@ var (
 )
 
 func init() {
-	modelCmd.PersistentFlags().StringVarP(&input.dir, "input-dir", "D", "tpl", "指定输入模板目录")
+	modelCmd.PersistentFlags().StringVarP(&input.dir, "input-dir", "D", "", "指定输入模板目录")
 	modelCmd.PersistentFlags().StringVarP(&input.nestFile, "nest-file", "n", "tpl/nest.yaml", "指定嵌套模板文件")
 	modelCmd.PersistentFlags().StringVarP(&output.dir, "output-dir", "o", "./output", "指定输出目录")
 	modelCmd.PersistentFlags().StringSliceVarP(&tables, "tables", "t", []string{}, "指定生成的表名")
@@ -46,8 +46,12 @@ var modelCmd = &cobra.Command{
 		c.InputDir = input.dir
 		c.OutputDir = output.dir
 		c.FS = globalF
-		if input.dir != "tpl" {
+		if input.dir != "" {
+			// 读本地的模板文件
 			c.FS = os.DirFS("./")
+		} else {
+			// 读默认的模板文件
+			c.InputDir = "tpl"
 		}
 		data, err := loadNestConfig(input.nestFile)
 		if err != nil {
