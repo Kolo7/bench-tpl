@@ -138,6 +138,25 @@ func buildInsertSql(rows []string) string {
 	return strings.Join(m, ",")
 }
 
+func parseOrder(order string, fieldNames []string) string{
+	order = strings.ToLower(order)
+	for _, col := range fieldNames {
+		if strings.Contains(order, col) {
+			order = col
+		}
+		if strings.Contains(order, "desc") {
+			order = col + " desc"
+		}
+		if strings.Contains(order, "asc") {
+			order = col + " asc"
+		}
+	}
+	if order == "" {
+		order = "id DESC"
+	}
+	return order
+}
+
 type Dao struct {
 	db *gorm.DB
 }

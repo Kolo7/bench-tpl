@@ -2,6 +2,7 @@
 // GetAll{{.upperTableName}} gets all {{.lowerTableName}} records from database.
 func (d *Dao) GetAll{{.upperTableName}}(ctx context.Context, pageNum, pageSize int, order string) (records []*model.{{.upperTableName}}, total int64, err error) {
 	query := fmt.Sprintf("SELECT * FROM {{.tableName}}")
+	order = parseOrder(order, {{.lowerTableName}}FieldNames)
 	searchQuery := fmt.Sprintf("%s ORDER BY ? LIMIT ? OFFSET ?", query)
 	db := ormDB.TxDB(ctx)
 	total, err = Count(ctx, db, query)
@@ -14,3 +15,4 @@ func (d *Dao) GetAll{{.upperTableName}}(ctx context.Context, pageNum, pageSize i
 	}
 	return records, total, nil
 }
+
