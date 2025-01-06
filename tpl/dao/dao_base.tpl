@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
     "github.com/jinzhu/gorm"
+	"github.com/samber/lo"
 	"git.imgo.tv/ft/go-ceres/pkg/db/mysql"
 )
 
@@ -138,24 +139,40 @@ func buildInsertSql(rows []string) string {
 	return strings.Join(m, ",")
 }
 
-func parseOrder(order string, fieldNames []string) string{
+func parseOrder(order string, fieldNames []string) string {
 	order = strings.ToLower(order)
+	orders := strings.Split(order, ",")
+	result := make([]string, 0)
+	for _, order := range orders {
+		result = append(result, parseOrderSingle(strings.TrimSpace(order), fieldNames))
+	}
+	result = lo.Filter(result, func(s string, _ int) bool { return s != "" })
+	if len(result) == 0 {
+		return "id desc"
+	}
+	return strings.Join(result, ",")
+}
+
+func parseOrderSingle(order string, fieldNames []string) string {
+	result := ""
 	for _, col := range fieldNames {
 		if strings.Contains(order, col) {
-			order = col
-		}
-		if strings.Contains(order, "desc") {
-			order = col + " desc"
-		}
-		if strings.Contains(order, "asc") {
-			order = col + " asc"
+			result = col
+			break
 		}
 	}
-	if order == "" {
-		order = "id DESC"
+	if result == "" {
+		return ""
 	}
-	return order
+	if strings.Contains(order, "desc") {
+		result = result + " desc"
+	} else if strings.Contains(order, "asc") {
+		result = result + " asc"
+	}
+
+	return result
 }
+
 
 type Dao struct {
 	db *gorm.DB
