@@ -156,6 +156,7 @@ func parseOrder(order string, fieldNames []string) string {
 func parseOrderSingle(order string, fieldNames []string) string {
 	result := ""
 	for _, col := range fieldNames {
+		col = strings.Trim(col, "`")
 		if strings.Contains(order, col) {
 			result = col
 			break
