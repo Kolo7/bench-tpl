@@ -127,14 +127,14 @@ func (p *defaultSchemaParser) loadRows(tableName string) ([]Row, error) {
 func (p *defaultSchemaParser) loadColumns(tableName string) ([]*Column, error) {
 	// 查询表结构
 	v := make([]*Column, 0)
-	rows, err := p.db.Query("DESCRIBE " + tableName)
+	rows, err := p.db.Query("SHOW FULL COLUMNS FROM " + tableName)
 	if err != nil {
 		return nil, errors.Wrapf(err, "查询表结构失败: %s", tableName)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		col := new(Column)
-		err = rows.Scan(&col.Field, &col.Type, &col.Null, &col.Key, &col.Default, &col.Extra)
+		err = rows.Scan(&col.Field, &col.Type, &col.Collation, &col.Null, &col.Key, &col.Default, &col.Extra, &col.Privileges, &col.Comment)
 		if err != nil {
 			return nil, errors.Wrapf(err, "扫描列数据失败: %s", tableName)
 		}

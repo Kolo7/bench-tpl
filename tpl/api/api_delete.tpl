@@ -1,3 +1,3 @@
 type {{.upperTableName}}DeleteReq struct {
-    {{.tableUpperPrimaryKeyField}} {{.tablePrimaryKey.GoType}} `form:"{{.tablePrimaryKey.Lower}}" binding:"required,min=0"`
+    {{.tableUpperPrimaryKeyField}} {{.tablePrimaryKey.GoType}} `form:"{{.tablePrimaryKey.Lower}}" binding:"required,min=0"` // {{.tablePrimaryKey.Comment}}
 }
