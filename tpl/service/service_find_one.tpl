@@ -1,5 +1,5 @@
 func (s *Service) {{.upperTableName}}Get(ctx context.Context, req api.{{.upperTableName}}Req) (*api.{{.upperTableName}}Resp, ecode.Codes) {
-    record,err := s.dao.{{ .upperTableName}}FindOne(ctx, req.{{.tableUpperPrimaryKeyField}})
+    record,err := s.d.{{ .upperTableName}}FindOne(ctx, req.{{.tableUpperPrimaryKeyField}})
     if errors.Is(err, gorm.ErrRecordNotFound) {
         return nil, ecode.RequestErr
     }else if err!= nil {

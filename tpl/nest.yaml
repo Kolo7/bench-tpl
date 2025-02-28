@@ -14,12 +14,15 @@
           pkgUnique: true
         - name: dao_gen
           override: true
-        - name: dao
+        - name: dao_gen_test
+          override: true
     - package: service
       nest:
         - name: service
           pkgUnique: true
         - name: service_gen
+        - name: service_gen_test
+          override: false
     - package: server
       nest:
         - package: http
@@ -27,6 +30,8 @@
             - name: http_gen
             - name: error
               pkgUnique: true
+            - name: http_gen_test
+              override: false
 - package: pkg
   nest:
     - package: validator
